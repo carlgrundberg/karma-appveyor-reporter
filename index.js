@@ -3,6 +3,15 @@ var path = require('path')
 var fs = require('fs')
 var request = require('superagent');
 
+function fullDescription(result) {
+    var s = "";
+    if(result.suite) {
+        s += result.suite.join(" > ") + " > ";
+    }
+    s += result.description;
+    return s;
+}
+
 var AppVeyorReporter = function (baseReporterDecorator, config, logger, helper, formatError) {
   var log = logger.create('reporter.appveyor')
   var doneCount = 0;
@@ -14,7 +23,7 @@ var AppVeyorReporter = function (baseReporterDecorator, config, logger, helper, 
   this.specSuccess = function(browser, result){
       doneCount++;
       request.post(baseUrl).send({
-          testName:result.description,
+          testName:fullDescription(result),
           testFramework:"Karma",
           fileName:browser.name,
           outcome:"Passed",
@@ -25,11 +34,11 @@ var AppVeyorReporter = function (baseReporterDecorator, config, logger, helper, 
               doneCallback();
           }
       });
-  } 
+  }
   this.specSkipped = function(browser, result) {
       doneCount++;
       request.post(baseUrl).send({
-          testName:result.description,
+          testName:fullDescription(result),
           testFramework:"Karma",
           fileName:browser.name,
           outcome:"Skipped",
@@ -44,7 +53,7 @@ var AppVeyorReporter = function (baseReporterDecorator, config, logger, helper, 
   this.specFailure = function (browser, result) {
       doneCount++;
       request.post(baseUrl).send({
-          testName:result.description,
+          testName:fullDescription(result),
           testFramework:"Karma",
           fileName:browser.name,
           outcome:"Failed",
